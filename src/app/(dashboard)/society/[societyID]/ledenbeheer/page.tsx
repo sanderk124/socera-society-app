@@ -22,7 +22,7 @@ export default async function MembersPage({ params }: { params: Promise<{ societ
     return (
         <div className="bg-white rounded-lg border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-gray-800 font-semibold">Leden ({memberships.length})</h2>
+                <h2 className="text-gray-800 font-semibold">Leden ({memberships.totalCount})</h2>
             </div>
             <table className="w-full text-sm">
                 <thead>
@@ -34,7 +34,7 @@ export default async function MembersPage({ params }: { params: Promise<{ societ
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                    {memberships.map((member) => (
+                    {memberships.items.map((member) => (
                         <tr key={member.id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 text-gray-700 font-mono text-xs">{member.userId}</td>
                             <td className="px-6 py-4">
@@ -58,7 +58,7 @@ export default async function MembersPage({ params }: { params: Promise<{ societ
                     ))}
                 </tbody>
             </table>
-            {memberships.length === 0 && (
+            {memberships.items.length === 0 && (
                 <p className="px-6 py-8 text-center text-gray-400 text-sm">Geen leden gevonden.</p>
             )}
         </div>
