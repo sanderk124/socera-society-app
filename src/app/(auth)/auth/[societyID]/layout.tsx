@@ -1,10 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getSocietyStatus } from '@/services/society.services'
-import { isAdminOrOwner } from '@/services/user.services'
-import Sidebar from '@/components/layout/Sidebar';
-import Topbar from '@/components/layout/Topbar';
 
-export default async function SocietyLayout({
+export default async function AuthSocietyLayout({
     children,
     params,
 }: {
@@ -12,7 +9,6 @@ export default async function SocietyLayout({
     params: Promise<{ societyID: string }>
 }) {
     const { societyID } = await params
-
     const result = await getSocietyStatus(societyID)
 
     if (!result.found) {
@@ -25,19 +21,5 @@ export default async function SocietyLayout({
         redirect(`/society-blocked?reason=${reason}&name=${name}`)
     }
 
-    const authorized = await isAdminOrOwner({ societyID })
-
-    if (!authorized) {
-        redirect('/unauthorized')
-    }
-
-    return (
-        <div className="min-h-screen bg-gray-50">
-            <Sidebar />
-            <Topbar />
-            <main className="ml-60 pt-14 p-6">
-                {children}
-            </main>
-        </div>
-    );
+    return <>{children}</>
 }

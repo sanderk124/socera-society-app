@@ -23,3 +23,15 @@ export type SocietyProfile = {
         url: string;
     }[];
 };
+
+export type SocietyStatusData = {
+    societyId: string
+    name: string
+    status: 'Approved' | 'Pending' | 'Denied'
+    isActive: boolean
+    createdAt: string
+}
+
+export type SocietyStatusResult =
+    | { found: true; data: SocietyStatusData }
+    | { found: false }
