@@ -15,3 +15,29 @@ export type PaginatedMemberships = {
     totalCount: number;
     totalPages: number;
 }
+
+export type ProfileMedia = {
+    mediaKind: string;
+    url: string;
+}
+
+export type SocietyMember = {
+    id: string;
+    firstName: string;
+    lastName: string;
+    displayName: string;
+    dateOfBirth: string;
+    phoneNumber: string;
+    email: string;
+    isActive: boolean;
+    profileMedia: ProfileMedia[];
+    membership: MembershipDetails;
+}
+
+export type PaginatedSocietyMembers = {
+    items: SocietyMember[];
+    pageNumber: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+}
