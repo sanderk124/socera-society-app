@@ -149,7 +149,17 @@ export async function updateMemberRole(params: {
     });
 
     if (!response.ok) {
-        throw new Error(`Failed to update member role: ${response.status}`);
+        const text = await response.text().catch(() => '');
+        let message = `Failed to update member role: ${response.status}`;
+        try {
+            const json = JSON.parse(text);
+            if (json.title) message = json.title;
+            else if (json.message) message = json.message;
+            else if (typeof json.errors === 'object') message = Object.values(json.errors).flat().join(' ');
+        } catch {
+            if (text) message = text;
+        }
+        throw new Error(message);
     }
 }
 
@@ -173,7 +183,17 @@ export async function updateMemberRoleAsOwner(params: {
     });
 
     if (!response.ok) {
-        throw new Error(`Failed to update member role as owner: ${response.status}`);
+        const text = await response.text().catch(() => '');
+        let message = `Failed to update member role: ${response.status}`;
+        try {
+            const json = JSON.parse(text);
+            if (json.title) message = json.title;
+            else if (json.message) message = json.message;
+            else if (typeof json.errors === 'object') message = Object.values(json.errors).flat().join(' ');
+        } catch {
+            if (text) message = text;
+        }
+        throw new Error(message);
     }
 }
 

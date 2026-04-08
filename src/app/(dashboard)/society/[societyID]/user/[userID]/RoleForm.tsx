@@ -12,17 +12,19 @@ type Props = {
 export function RoleForm({ currentRole, availableRoles, currentUserIsOwner, action }: Props) {
     const [selectedRole, setSelectedRole] = useState(currentRole);
     const [isPending, startTransition] = useTransition();
-    const [result, setResult] = useState<'success' | 'error' | null>(null);
+    const [success, setSuccess] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        setResult(null);
+        setSuccess(false);
+        setErrorMessage(null);
         startTransition(async () => {
             try {
                 await action(selectedRole);
-                setResult('success');
-            } catch {
-                setResult('error');
+                setSuccess(true);
+            } catch (err) {
+                setErrorMessage(err instanceof Error ? err.message : 'Er ging iets mis. Probeer het opnieuw.');
             }
         });
     }
@@ -36,7 +38,7 @@ export function RoleForm({ currentRole, availableRoles, currentUserIsOwner, acti
                 <div className="flex items-center gap-3">
                     <select
                         value={selectedRole}
-                        onChange={e => { setSelectedRole(e.target.value); setResult(null); }}
+                        onChange={e => { setSelectedRole(e.target.value); setSuccess(false); setErrorMessage(null); }}
                         className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                         disabled={isPending}
                     >
@@ -60,11 +62,11 @@ export function RoleForm({ currentRole, availableRoles, currentUserIsOwner, acti
                 </p>
             )}
 
-            {result === 'success' && (
+            {success && (
                 <p className="text-xs text-green-600">Rol succesvol gewijzigd.</p>
             )}
-            {result === 'error' && (
-                <p className="text-xs text-red-500">Er ging iets mis. Probeer het opnieuw.</p>
+            {errorMessage && (
+                <p className="text-xs text-red-500">{errorMessage}</p>
             )}
         </div>
     );
