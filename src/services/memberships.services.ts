@@ -129,6 +129,54 @@ export async function denyMembership(params: {
     }
 }
 
+export async function updateMemberRole(params: {
+    societyId: string;
+    membershipId: string;
+    newRole: string;
+}): Promise<void> {
+    const { societyId, membershipId, newRole } = params;
+    const session = await getServerSession(authOptions);
+
+    const url = `${process.env.API_BASE_URL}/api/v1/societies/${societyId}/memberships/${membershipId}/roles`;
+
+    const response = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+            'Authorization': `Bearer ${session?.accessToken}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ newRole }),
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to update member role: ${response.status}`);
+    }
+}
+
+export async function updateMemberRoleAsOwner(params: {
+    societyId: string;
+    membershipId: string;
+    newRole: string;
+}): Promise<void> {
+    const { societyId, membershipId, newRole } = params;
+    const session = await getServerSession(authOptions);
+
+    const url = `${process.env.API_BASE_URL}/api/v1/societies/${societyId}/memberships/${membershipId}/roles/ownership`;
+
+    const response = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+            'Authorization': `Bearer ${session?.accessToken}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ newRole }),
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to update member role as owner: ${response.status}`);
+    }
+}
+
 export async function deactivateMembership(params: {
     societyId: string;
     membershipId: string;

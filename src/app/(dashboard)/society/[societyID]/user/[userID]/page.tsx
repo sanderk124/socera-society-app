@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { getSocietyMember, approveMembership, denyMembership, deactivateMembership } from '@/services/memberships.services';
+import { getSocietyMember, approveMembership, denyMembership, deactivateMembership, updateMemberRole, updateMemberRoleAsOwner } from '@/services/memberships.services';
 import { getMembershipDetails } from '@/services/user.services';
 import { ROLES } from '@/constants/role.constant';
 import { MEMBERSHIP_STATUS } from '@/constants/status.constant';
 import { DeactivateButton } from './DeactivateButton';
+import { RoleForm } from './RoleForm';
 
 const roleColors: Record<string, string> = {
     [ROLES.OWNER]: 'bg-purple-100 text-purple-700',
@@ -20,7 +21,8 @@ const statusColors: Record<string, string> = {
     [MEMBERSHIP_STATUS.DENIED]: 'bg-red-100 text-red-700',
 };
 
-const allRoles = [ROLES.MEMBER, ROLES.BOARDMEMBER, ROLES.ADMIN, ROLES.OWNER];
+const adminRoles = [ROLES.MEMBER, ROLES.BOARDMEMBER, ROLES.ADMIN];
+const ownerRoles = [ROLES.MEMBER, ROLES.BOARDMEMBER, ROLES.ADMIN, ROLES.OWNER];
 
 export default async function MemberProfilePage({
     params,
@@ -40,6 +42,8 @@ export default async function MemberProfilePage({
 
     const isSelf = currentUserMembership?.userId === member.id;
     const cannotDeactivate = isSelf && membership.role === ROLES.OWNER;
+    const currentUserIsOwner = currentUserMembership?.role === ROLES.OWNER;
+    const availableRoles = currentUserIsOwner ? ownerRoles : adminRoles;
 
     async function handleApprove() {
         'use server';
@@ -57,6 +61,16 @@ export default async function MemberProfilePage({
         'use server';
         await deactivateMembership({ societyId: societyID, membershipId: membership.id });
         redirect(`/society/${societyID}/ledenbeheer`);
+    }
+
+    async function handleUpdateRole(newRole: string) {
+        'use server';
+        if (currentUserIsOwner) {
+            await updateMemberRoleAsOwner({ societyId: societyID, membershipId: membership.id, newRole });
+        } else {
+            await updateMemberRole({ societyId: societyID, membershipId: membership.id, newRole });
+        }
+        revalidatePath(`/society/${societyID}/user/${userID}`);
     }
 
     return (
@@ -176,25 +190,12 @@ export default async function MemberProfilePage({
                             <h2 className="text-sm font-semibold text-gray-700">Rol beheren</h2>
                         </div>
                         <div className="px-6 py-4">
-                            <label className="block text-sm text-gray-600 mb-2">Rol wijzigen</label>
-                            <div className="flex items-center gap-3">
-                                <select
-                                    defaultValue={membership.role}
-                                    className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    disabled
-                                >
-                                    {allRoles.map(role => (
-                                        <option key={role} value={role}>{role}</option>
-                                    ))}
-                                </select>
-                                <button
-                                    type="button"
-                                    disabled
-                                    className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md opacity-50 cursor-not-allowed"
-                                >
-                                    Opslaan
-                                </button>
-                            </div>
+                            <RoleForm
+                                currentRole={membership.role}
+                                availableRoles={availableRoles}
+                                currentUserIsOwner={currentUserIsOwner}
+                                action={handleUpdateRole}
+                            />
                         </div>
                     </div>
 
@@ -205,19 +206,6 @@ export default async function MemberProfilePage({
                         </div>
                         <div className="px-6 py-4 space-y-3">
                             <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-800">Eigenaarschap overdragen</p>
-                                    <p className="text-xs text-gray-500">Geef het eigenaarschap van deze society door aan dit lid.</p>
-                                </div>
-                                <button
-                                    type="button"
-                                    disabled
-                                    className="px-4 py-2 bg-yellow-500 text-white text-sm font-medium rounded-md opacity-50 cursor-not-allowed"
-                                >
-                                    Overdragen
-                                </button>
-                            </div>
-                            <div className="border-t border-gray-100 pt-3 flex items-center justify-between">
                                 <div>
                                     <p className="text-sm font-medium text-gray-800">Lid uitschrijven</p>
                                     <p className="text-xs text-gray-500">
