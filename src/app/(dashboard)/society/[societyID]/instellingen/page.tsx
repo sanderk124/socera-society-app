@@ -23,7 +23,6 @@ export default async function SettingsPage({
 
     return (
         <div className="max-w-3xl pt-4">
-            {/* Page header */}
 
             {/* Success banner */}
             {saved === 'true' && (
