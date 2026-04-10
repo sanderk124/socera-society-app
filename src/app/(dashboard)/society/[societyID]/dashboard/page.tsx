@@ -2,9 +2,9 @@ import Link from 'next/link';
 import { Users, UserCheck, CalendarDays, Clock, MapPin } from 'lucide-react';
 import { getSocietyMembers } from '@/services/memberships.services';
 import { MEMBERSHIP_STATUS } from '@/constants/status.constant';
-import { StatsCard } from '@/components/dashboard/StatsCard';
-import { Calendar } from '@/components/dashboard/Calendar';
-import { PendingMembersCard } from '@/components/dashboard/PendingMembersCard';
+import { StatsCard } from '@/components/features/dashboard/StatsCard';
+import { Calendar } from '@/components/features/dashboard/Calendar';
+import { PendingMembersCard } from '@/components/features/dashboard/PendingMembersCard';
 
 export default async function SocietyDashboard({ params }: { params: Promise<{ societyID: string }> }) {
     const { societyID } = await params;
