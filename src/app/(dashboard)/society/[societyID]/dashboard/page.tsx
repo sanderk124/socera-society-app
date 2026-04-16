@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Users, UserCheck, CalendarDays, Clock, MapPin } from 'lucide-react';
 import { getSocietyMembers } from '@/services/memberships.services';
+import { getSocietyEvents } from '@/services/events.services';
 import { MEMBERSHIP_STATUS } from '@/constants/status.constant';
 import { StatsCard } from '@/components/features/dashboard/StatsCard';
 import { Calendar } from '@/components/features/dashboard/Calendar';
@@ -9,7 +10,10 @@ import { PendingMembersCard } from '@/components/features/dashboard/PendingMembe
 export default async function SocietyDashboard({ params }: { params: Promise<{ societyID: string }> }) {
     const { societyID } = await params;
 
-    const membersData = await getSocietyMembers({ societyId: societyID, pageSize: 100 });
+    const [membersData, events] = await Promise.all([
+        getSocietyMembers({ societyId: societyID, pageSize: 100 }),
+        getSocietyEvents({ societyId: societyID }),
+    ]);
 
     const pendingMembers = membersData.items.filter(
         m => m.membership.status === MEMBERSHIP_STATUS.PENDING
@@ -17,6 +21,9 @@ export default async function SocietyDashboard({ params }: { params: Promise<{ s
     const activeMembers = membersData.items.filter(
         m => m.membership.status === MEMBERSHIP_STATUS.APPROVED && m.membership.isActive
     );
+
+    const now = new Date();
+    const upcomingEvents = events.filter(e => new Date(e.startsAt) >= now);
 
     return (
         <div className="space-y-6 pt-4">
@@ -45,18 +52,17 @@ export default async function SocietyDashboard({ params }: { params: Promise<{ s
                 />
                 <StatsCard
                     label="Aankomende evenementen"
-                    value={3}
+                    value={upcomingEvents.length}
                     icon={CalendarDays}
                     iconBg="bg-purple-50"
                     iconColor="text-purple-600"
-                    sub="deze maand"
                 />
             </div>
 
             {/* Calendar + Pending members */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
                 <div className="lg:col-span-3">
-                    <Calendar />
+                    <Calendar events={events} />
                 </div>
                 <div className="lg:col-span-2">
                     <PendingMembersCard members={pendingMembers} societyID={societyID} />
