@@ -6,7 +6,7 @@ export type EventMedia = {
 export type EventRsvp = {
     id: string;
     userId: string;
-    status: 'Going' | 'NotGoing';
+    status: 'Going' | 'NotGoing' | 'Maybe';
 };
 
 export type SocietyEvent = {
