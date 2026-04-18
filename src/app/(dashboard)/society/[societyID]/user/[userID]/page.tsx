@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { getSocietyMember, approveMembership, denyMembership, deactivateMembership, updateMemberRole, updateMemberRoleAsOwner } from '@/services/memberships.services';
+import { getSocietyMember, getSocietyMemberships, approveMembership, denyMembership, deactivateMembership, updateMemberRole, updateMemberRoleAsOwner } from '@/services/memberships.services';
 import { getMembershipDetails } from '@/services/user.services';
 import { ROLES } from '@/constants/role.constant';
 import { MEMBERSHIP_STATUS } from '@/constants/status.constant';
@@ -24,19 +24,41 @@ const statusColors: Record<string, string> = {
 const adminRoles = [ROLES.MEMBER, ROLES.BOARDMEMBER, ROLES.ADMIN];
 const ownerRoles = [ROLES.MEMBER, ROLES.BOARDMEMBER, ROLES.ADMIN, ROLES.OWNER];
 
+const DEFAULT_MEMBERSHIP_PAGE_SIZE = 50;
+
 export default async function MemberProfilePage({
     params,
+    searchParams,
 }: {
     params: Promise<{ societyID: string; userID: string }>;
+    searchParams: Promise<{ membershipPageSize?: string }>;
 }) {
     const { societyID, userID } = await params;
+    const { membershipPageSize: membershipPageSizeParam } = await searchParams;
+    const membershipPageSize = Math.max(
+        DEFAULT_MEMBERSHIP_PAGE_SIZE,
+        Number(membershipPageSizeParam) || DEFAULT_MEMBERSHIP_PAGE_SIZE
+    );
 
-    const [member, currentUserMembership] = await Promise.all([
+    const [member, currentUserMembership, allMemberships] = await Promise.all([
         getSocietyMember({ societyId: societyID, userId: userID }),
         getMembershipDetails({ societyID }),
+        getSocietyMemberships({ societyId: societyID, pageSize: membershipPageSize }),
     ]);
 
-    const { membership } = member;
+    // A user can have multiple membership rows (approved, pending re-apply, removed, etc.).
+    // Approved beats everything; then Pending (actionable); then Denied; then Removed.
+    const statusPriority: Record<string, number> = {
+        [MEMBERSHIP_STATUS.APPROVED]: 0,
+        [MEMBERSHIP_STATUS.PENDING]: 1,
+        [MEMBERSHIP_STATUS.DENIED]: 2,
+        [MEMBERSHIP_STATUS.REMOVED]: 3,
+    };
+    const userMemberships = allMemberships.items.filter(m => m.userId === userID);
+    const membership = userMemberships.sort(
+        (a, b) => (statusPriority[a.status] ?? 99) - (statusPriority[b.status] ?? 99)
+    )[0] ?? member.membership;
+    const hasMoreMemberships = allMemberships.totalCount > membershipPageSize;
     const avatar = member.profileMedia.find(m => m.mediaKind === 'Avatar');
     const isPending = membership.status === MEMBERSHIP_STATUS.PENDING;
 
@@ -155,6 +177,20 @@ export default async function MemberProfilePage({
                     </dl>
                 </div>
             </div>
+
+            {!isPending && hasMoreMemberships && (
+                <div className="bg-white rounded-lg border border-gray-200 px-6 py-4 flex items-center justify-between">
+                    <p className="text-sm text-gray-500">
+                        Niet alle lidmaatschappen zijn geladen. Er kan een openstaand verzoek zijn.
+                    </p>
+                    <Link
+                        href={`?membershipPageSize=${membershipPageSize + DEFAULT_MEMBERSHIP_PAGE_SIZE}`}
+                        className="px-3 py-1.5 text-sm font-medium text-blue-600 border border-blue-300 rounded-md hover:bg-blue-50 transition-colors"
+                    >
+                        Meer laden
+                    </Link>
+                </div>
+            )}
 
             {isPending ? (
                 /* Pending: accept / reject */

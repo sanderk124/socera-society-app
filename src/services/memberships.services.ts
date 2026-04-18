@@ -102,7 +102,7 @@ export async function approveMembership(params: {
     const url = `${process.env.API_BASE_URL}/api/v1/societies/${societyId}/memberships/${membershipId}/approve`;
 
     const response = await fetch(url, {
-        method: 'POST',
+        method: 'PATCH',
         headers: {
             'Authorization': `Bearer ${session.accessToken}`,
         },
@@ -124,7 +124,7 @@ export async function denyMembership(params: {
     const url = `${process.env.API_BASE_URL}/api/v1/societies/${societyId}/memberships/${membershipId}/deny`;
 
     const response = await fetch(url, {
-        method: 'POST',
+        method: 'PATCH',
         headers: {
             'Authorization': `Bearer ${session?.accessToken}`,
         },
@@ -224,6 +224,6 @@ export async function deactivateMembership(params: {
     });
 
     if (!response.ok) {
-        throw new Error(`Failed to deactivate membership: ${response.status}`);
+        throw new Error(`Failed to deactivate membership: ${response.status} ${response.statusText}`);
     }
 }

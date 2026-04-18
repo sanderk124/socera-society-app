@@ -14,9 +14,10 @@ const statusColors: Record<string, string> = {
     [MEMBERSHIP_STATUS.APPROVED]: 'bg-green-100 text-green-700',
     [MEMBERSHIP_STATUS.PENDING]: 'bg-yellow-100 text-yellow-700',
     [MEMBERSHIP_STATUS.DENIED]: 'bg-red-100 text-red-700',
+    [MEMBERSHIP_STATUS.REMOVED]: 'bg-gray-100 text-gray-500',
 };
 
-type Tab = 'active' | 'pending' | 'denied';
+type Tab = 'active' | 'pending' | 'denied' | 'removed';
 
 export default async function MembersPage({
     params,
@@ -27,7 +28,7 @@ export default async function MembersPage({
 }) {
     const { societyID } = await params;
     const { tab } = await searchParams;
-    const activeTab: Tab = tab === 'pending' ? 'pending' : tab === 'denied' ? 'denied' : 'active';
+    const activeTab: Tab = tab === 'pending' ? 'pending' : tab === 'denied' ? 'denied' : tab === 'removed' ? 'removed' : 'active';
 
     // Fetch all members for user profile data, and ALL memberships (including duplicates per user)
     const [members, memberships] = await Promise.all([
@@ -51,10 +52,20 @@ export default async function MembersPage({
         user: userMap.get(membership.userId) ?? null,
     }));
 
+    // For removed: deduplicate per user, keep only the most recent removed record.
+    const removedByUser = new Map<string, typeof enriched[number]>();
+    for (const m of enriched.filter(m => m.status === MEMBERSHIP_STATUS.REMOVED)) {
+        const existing = removedByUser.get(m.userId);
+        if (!existing || new Date(m.joinedAt) > new Date(existing.joinedAt)) {
+            removedByUser.set(m.userId, m);
+        }
+    }
+
     const byStatus = {
         active: enriched.filter(m => m.status === MEMBERSHIP_STATUS.APPROVED),
         pending: enriched.filter(m => m.status === MEMBERSHIP_STATUS.PENDING),
         denied: enriched.filter(m => m.status === MEMBERSHIP_STATUS.DENIED),
+        removed: Array.from(removedByUser.values()),
     };
 
     const currentItems = byStatus[activeTab];
@@ -63,12 +74,14 @@ export default async function MembersPage({
         { key: 'active', label: 'Actieve leden', count: byStatus.active.length },
         { key: 'pending', label: 'Pending leden', count: byStatus.pending.length },
         { key: 'denied', label: 'Afgewezen aanvragen', count: byStatus.denied.length },
+        { key: 'removed', label: 'Verwijderde leden', count: byStatus.removed.length },
     ];
 
     const emptyMessages: Record<Tab, string> = {
         active: 'Geen actieve leden gevonden.',
         pending: 'Geen openstaande verzoeken.',
         denied: 'Geen afgewezen aanvragen.',
+        removed: 'Geen verwijderde leden.',
     };
 
     return (
