@@ -93,18 +93,24 @@ export async function approveMembership(params: {
 }): Promise<void> {
     const { societyId, membershipId } = params;
     const session = await getServerSession(authOptions);
+    console.log(`membershipId`, membershipId);
+
+    if (!session?.accessToken) {
+        throw new Error('Unauthorized');
+    }
 
     const url = `${process.env.API_BASE_URL}/api/v1/societies/${societyId}/memberships/${membershipId}/approve`;
 
     const response = await fetch(url, {
-        method: 'POST',
+        method: 'PATCH',
         headers: {
-            'Authorization': `Bearer ${session?.accessToken}`,
+            'Authorization': `Bearer ${session.accessToken}`,
         },
     });
 
     if (!response.ok) {
-        throw new Error(`Failed to approve membership: ${response.status}`);
+        console.log('response', response);
+        throw new Error(`Failed to approve membership: ${response.statusText}`);
     }
 }
 
@@ -118,7 +124,7 @@ export async function denyMembership(params: {
     const url = `${process.env.API_BASE_URL}/api/v1/societies/${societyId}/memberships/${membershipId}/deny`;
 
     const response = await fetch(url, {
-        method: 'POST',
+        method: 'PATCH',
         headers: {
             'Authorization': `Bearer ${session?.accessToken}`,
         },
@@ -203,17 +209,21 @@ export async function deactivateMembership(params: {
 }): Promise<void> {
     const { societyId, membershipId } = params;
     const session = await getServerSession(authOptions);
+    console.log(`membershipId`, membershipId);
+    if (!session?.accessToken) {
+        throw new Error('Unauthorized');
+    }
 
-    const url = `${process.env.API_BASE_URL}/api/v1/societies/${societyId}/memberships/${membershipId}/deactivate`;
+    const url = `${process.env.API_BASE_URL}/api/v1/societies/${societyId}/memberships/${membershipId}/remove`;
 
     const response = await fetch(url, {
         method: 'PATCH',
         headers: {
-            'Authorization': `Bearer ${session?.accessToken}`,
+            'Authorization': `Bearer ${session.accessToken}`,
         },
     });
 
     if (!response.ok) {
-        throw new Error(`Failed to deactivate membership: ${response.status}`);
+        throw new Error(`Failed to deactivate membership: ${response.status} ${response.statusText}`);
     }
 }

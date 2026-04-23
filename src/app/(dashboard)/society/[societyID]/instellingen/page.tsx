@@ -23,7 +23,6 @@ export default async function SettingsPage({
 
     return (
         <div className="max-w-3xl pt-4">
-            {/* Page header */}
 
             {/* Success banner */}
             {saved === 'true' && (
@@ -102,7 +101,7 @@ export default async function SettingsPage({
                                 name="name"
                                 type="text"
                                 defaultValue={profile.name}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-shadow"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent placeholder:text-gray-400 transition-shadow"
                             />
                         </div>
                         <div>
@@ -143,7 +142,7 @@ export default async function SettingsPage({
                                     name="contactEmail"
                                     type="email"
                                     defaultValue={profile.societyContactInfo.contactEmail}
-                                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-shadow"
+                                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent placeholder:text-gray-400 transition-shadow"
                                 />
                             </div>
                         </div>
@@ -164,7 +163,7 @@ export default async function SettingsPage({
                                     name="contactPhoneNumber"
                                     type="tel"
                                     defaultValue={profile.societyContactInfo.contactPhoneNumber}
-                                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-shadow"
+                                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent placeholder:text-gray-400 transition-shadow"
                                 />
                             </div>
                         </div>
@@ -185,7 +184,7 @@ export default async function SettingsPage({
                                     name="contactWebsite"
                                     type="url"
                                     defaultValue={profile.societyContactInfo.societyWebsite ?? ''}
-                                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-shadow"
+                                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent placeholder:text-gray-400 transition-shadow"
                                 />
                             </div>
                         </div>

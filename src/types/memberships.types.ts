@@ -3,7 +3,7 @@ export type MembershipDetails = {
     userId: string;
     societyId: string;
     role: 'Owner' | 'Admin' | 'Boardmember' | 'Member';
-    status: 'Approved' | 'Pending' | 'Denied';
+    status: 'Approved' | 'Pending' | 'Denied' | 'Removed';
     joinedAt: string;
     isActive: boolean;
 }
