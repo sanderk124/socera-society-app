@@ -19,18 +19,32 @@ export function EventMediaSection({
     const [bannerPreview, setBannerPreview] = useState<string | null>(currentBannerUrl);
     const [isPendingAvatar, startAvatarTransition] = useTransition();
     const [isPendingBanner, startBannerTransition] = useTransition();
+    const [avatarSuccess, setAvatarSuccess] = useState(false);
+    const [bannerSuccess, setBannerSuccess] = useState(false);
 
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
+    const avatarTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const bannerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
-        if (file) setAvatarPreview(URL.createObjectURL(file));
+        if (file) {
+            setAvatarPreview(URL.createObjectURL(file));
+            setAvatarSuccess(true);
+            if (avatarTimerRef.current) clearTimeout(avatarTimerRef.current);
+            avatarTimerRef.current = setTimeout(() => setAvatarSuccess(false), 3000);
+        }
     }
 
     function handleBannerChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
-        if (file) setBannerPreview(URL.createObjectURL(file));
+        if (file) {
+            setBannerPreview(URL.createObjectURL(file));
+            setBannerSuccess(true);
+            if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current);
+            bannerTimerRef.current = setTimeout(() => setBannerSuccess(false), 3000);
+        }
     }
 
     function handleDeleteAvatar() {
@@ -67,7 +81,7 @@ export function EventMediaSection({
                         </div>
                     )}
                 </div>
-                <div className="flex items-center gap-2 mt-2">
+                <div className="flex items-center gap-2 mt-2 flex-wrap">
                     <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -92,6 +106,14 @@ export function EventMediaSection({
                             {isPendingBanner ? 'Verwijderen...' : 'Verwijderen'}
                         </button>
                     )}
+                    {bannerSuccess && (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                            Upload succesvol
+                        </span>
+                    )}
                 </div>
             </div>
 
@@ -114,7 +136,7 @@ export function EventMediaSection({
                             </div>
                         )}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                         <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -138,6 +160,14 @@ export function EventMediaSection({
                             >
                                 {isPendingAvatar ? 'Verwijderen...' : 'Verwijderen'}
                             </button>
+                        )}
+                        {avatarSuccess && (
+                            <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                </svg>
+                                Upload succesvol
+                            </span>
                         )}
                     </div>
                 </div>
